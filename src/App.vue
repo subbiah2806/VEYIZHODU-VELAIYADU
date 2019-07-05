@@ -11,8 +11,11 @@
 import loading from "./components/loading.vue";
 import store from "./store";
 import { mapGetters, mapActions } from "vuex";
-import { setTimeout } from "timers";
-/* eslint-disable */
+import Vue from "vue";
+import VueMaterial from "vue-material";
+import "vue-material/dist/vue-material.min.css";
+
+Vue.use(VueMaterial);
 export default {
   name: "app",
   components: {
@@ -42,22 +45,22 @@ export default {
       const fromDepth = from.path.split("/").length;
       this.transitionName = toDepth < fromDepth ? "slide-right" : "slide-left";
     },
-    getLoading(currentValue, oldValue) {
+    getLoading(currentValue) {
       this.isloading = currentValue;
     }
   }
 };
 </script>
 
-<style>
+<style lang="scss">
+@import "@/main.scss";
+
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  background-color: #1b1b1b;
   width: 100vw;
-  height: 100vh;
+  height: 400vh;
 }
 </style>

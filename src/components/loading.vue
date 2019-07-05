@@ -12,12 +12,10 @@
 </template>
 
 <script>
-/* eslint-disable */
-import { TweenMax, TimelineMax, Bounce, TweenLite } from "gsap/all";
+import { TimelineMax, Bounce } from "gsap/all";
 import Vue from "vue";
 import store from "../store";
 import { mapGetters } from "vuex";
-import { setTimeout } from "timers";
 
 export default {
   name: "loading",
@@ -31,7 +29,9 @@ export default {
       },
       grid: [0, 0],
       squareDia: 0,
-      stopLoading: false
+      stopLoading: false,
+      animateStop: false,
+      animation: undefined
     };
   },
   computed: {
@@ -40,28 +40,16 @@ export default {
   watch: {
     getLoading(currentValue) {
       if (currentValue === "stop") {
-        TweenLite.to(".loading", 1, { opacity: 0, display: "none" });
-        setTimeout(() => {
-          this.stopLoading = true;
-          store.dispatch({
-            type: "loading",
-            payload: false
-          });
-        }, 1000);
+        this.animateStop = true;
       } else if (currentValue === true) {
         this.stopLoading = false;
         Vue.nextTick(() => {
-          TweenLite.to(".loading", 1.5, { opacity: 1, display: "flex" });
           this.performLoading();
         });
       }
     }
   },
   mounted() {
-    TweenLite.to(".loading", 0.1, { opacity: 1, display: "flex" });
-    this.performLoading();
-  },
-  created() {
     window.addEventListener("resize", this.handleResize);
     this.handleResize();
   },
@@ -71,38 +59,51 @@ export default {
   methods: {
     handleResize() {
       const clientWidth = window.innerWidth;
-      const squareDia = clientWidth / 20;
       const clientHeight = window.innerHeight;
-      const vertical = Math.ceil(clientHeight / squareDia);
-      const horizontal = Math.ceil(clientWidth / squareDia);
+      this.squareDia = Math.sqrt((clientWidth * clientHeight) / 100);
+      const vertical = Math.ceil(clientHeight / this.squareDia);
+      const horizontal = Math.ceil(clientWidth / this.squareDia);
       this.grid = [horizontal, vertical];
-      this.squareDia = squareDia;
-    },
-    performLoading() {
-      this.array = Array.from({ length: this.grid[0] * this.grid[1] }).map(
+      this.array = Array.from({ length: horizontal * vertical }).map(
         (value, index) => index
       );
-      this.loadingStyle.width = `${this.squareDia}px`;
-      this.loadingStyle.height = `${this.squareDia}px`;
+      this.loadingStyle.width = `${clientWidth / horizontal}px`;
+      this.loadingStyle.height = `${clientHeight / vertical}px`;
+      if (this.animation) {
+        this.animation.kill();
+        this.animation = undefined;
+      }
+      this.performLoading();
+    },
+    performLoading() {
       Vue.nextTick(() => {
-        const lt = new TimelineMax({});
-        lt.staggerTo(".box", 1, {
+        this.animation = new TimelineMax({
+          repeat: -1,
+          onRepeat: this.checkShouldStop
+        });
+        this.animation.from(".box", 1.5, { opacity: 0 });
+        this.animation.staggerTo(".box", 1, {
           scale: 0,
-          y: 10,
           yoyo: true,
           ease: Bounce,
-          repeat: -1,
           repeatDelay: 0.5,
           stagger: {
             grid: this.grid,
             from: "center",
             amount: 1
-          },
-          onComplete: () => {
-            console.log("complete");
           }
         });
       });
+    },
+    checkShouldStop() {
+      if (this.animateStop) {
+        this.animation.stop();
+        this.stopLoading = true;
+        store.dispatch({
+          type: "loading",
+          payload: false
+        });
+      }
     }
   }
 };
@@ -111,16 +112,17 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 #loading {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 999;
   overflow: hidden;
-  display: none;
+  display: flex;
   flex-wrap: wrap;
   width: 100vw;
   height: 100vh;
-  opacity: 0;
+  align-content: flex-start;
+  background-color: #1b1b1b;
 }
 .box {
   background: white;
