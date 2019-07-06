@@ -53,7 +53,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/main.scss";
+@import "@/App.scss";
 
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;

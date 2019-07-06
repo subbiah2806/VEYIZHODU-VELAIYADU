@@ -81,7 +81,7 @@ export default {
           repeat: -1,
           onRepeat: this.checkShouldStop
         });
-        this.animation.from(".box", 1.5, { opacity: 0 });
+        this.animation.from(".box", 1.5, { autoAlpha: 0 });
         this.animation.staggerTo(".box", 1, {
           scale: 0,
           yoyo: true,

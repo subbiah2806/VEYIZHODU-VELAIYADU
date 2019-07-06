@@ -3,7 +3,6 @@ $primaryDull: hsla(0, 0%, 100%, 0.35);
 $secondary: rgb(118, 62, 223);
 @mixin textDefault {
   display: inline-block;
-  mix-blend-mode: exclusion;
   color: #fff;
 }
 .textDefaultFormat {
@@ -19,7 +18,7 @@ h1 {
 }
 .h1-stroke {
   -webkit-text-stroke: 1.5px #fff;
-  color: transparent;
+  color: transparent !important;
 }
 a {
   border-bottom: 1px solid $secondary;
@@ -33,13 +32,23 @@ a:hover {
   color: $primaryDull;
   outline: 0;
   border-bottom-color: $primaryDull;
-  mix-blend-mode: exclusion;
+}
+.img-tootltip {
+  position: fixed;
+  opacity: 0;
+  border-radius: 15px;
+}
+.text-center {
+  text-align: center;
 }
 @media (max-width: 575.98px) {
   h1 {
     font-size: 12.2vw;
     line-height: 1.05em;
     margin-bottom: 25px;
+  }
+  .img-tootltip {
+    width: 77vw;
   }
 }
 
@@ -49,6 +58,9 @@ a:hover {
     font-size: 13.2vw;
     line-height: 1.03em;
   }
+  .img-tootltip {
+    width: 67vw;
+  }
 }
 
 // Medium devices (tablets, 768px and up)
@@ -56,6 +68,9 @@ a:hover {
   h1 {
     font-size: 13vw;
     line-height: 1em;
+  }
+  .img-tootltip {
+    width: 54vw;
   }
 }
 
@@ -65,8 +80,7 @@ a:hover {
     font-size: 7.5vw;
     line-height: 1em;
   }
-}
-
-.text-center {
-  text-align: center;
+  .img-tootltip {
+    width: 54vw;
+  }
 }

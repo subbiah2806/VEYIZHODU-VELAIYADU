@@ -1,17 +1,18 @@
 <template>
   <div id="Home" ref="Home">
     <div class="Home-left">
-      <section class="fullHeight">
+      <section class="fullHeight" ref="section1">
         <div class="section1 text-center">
-          <div>
+          <div class="section1-scrollSkew">
             <h1>
               தமிழோடு விளையாடு
-              <div class="heading1-child">வாங்க தமிழ் பழகலாம்</div>
+              <div class="heading1-child Zindex1">வாங்க தமிழ் பழகலாம்</div>
             </h1>
-            <div class="textDefaultFormat lineHeight">
+            <h1 class="h1-stroke title-stroke-abs">தமிழோடு விளையாடு</h1>
+            <div class="textDefaultFormat lineHeight Zindex1">
               created by
-              <a>Subbiah Chandramouli</a>. Event hosted by
-              <a>Karl Mark's</a>
+              <a v-img-tooltip:top="subbiahTooltip">Subbiah Chandramouli</a>. Event hosted by
+              <a v-img-tooltip:down="markToolTip">Karl Mark's</a>
             </div>
           </div>
           <div class="textDefaultFormat scrollDown">
@@ -29,108 +30,150 @@
   </div>
 </template>
 <script>
-import { TimelineMax, TweenLite } from "gsap/all";
+import { TimelineMax, TimelineLite, TweenLite } from "gsap/all";
+import { imageToolTipOnHover } from "../App.directive";
 export default {
   name: "Home",
   props: {},
+  directives: {
+    "img-tooltip": imageToolTipOnHover
+  },
   data() {
     return {
       scrollAnimation: undefined,
-      totalScrollHeight: 0
+      html: undefined,
+      body: undefined,
+      scroller: undefined,
+      requestId: undefined,
+      subbiahTooltip: {
+        file: "subbiah.gif",
+        right: "-20vw",
+        top: "0vh",
+        x: undefined,
+        y: undefined
+      },
+      markToolTip: {
+        file: "subbiah.gif",
+        left: "0",
+        top: "0",
+        x: undefined,
+        y: undefined
+      }
     };
   },
   mounted() {
-    this.totalScrollHeight = window.innerHeight * 3;
-    this.addAnimations();
-    this.customScroll();
-    window.addEventListener("scroll", () => {
-      this.scrollFunction();
+    const screenWidth = window.innerWidth;
+    if (screenWidth && screenWidth < 600) {
+      this.subbiahTooltip.top = undefined;
+      this.subbiahTooltip.y = 100;
+      this.subbiahTooltip.right = "0vw";
+      this.markToolTip.top = undefined;
+      this.markToolTip.y = 60;
+      this.subbiahTooltip.left = "0vw";
+    }
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
     });
+    this.addAnimations();
+  },
+  destroyed() {
+    document.removeEventListener("scroll", this.onScroll);
   },
   methods: {
     addAnimations() {
       this.$nextTick(() => {
         const lt = new TimelineMax({});
-        lt.from("#Home", 2, { opacity: 0 });
-      });
-    },
-    scrollFunction() {
-      TweenLite.set("#Home", {
-        y: -window.pageYOffset
+        lt.from("#Home", 2, { autoAlpha: 0 });
+        this.section1 = new TimelineMax({ paused: true });
+        this.section1.to(".section1-scrollSkew", 0.1, {
+          skewType: "simple",
+          skewY: "12deg",
+          autoAlpha: 0
+        });
+        this.section1ScrollBar = new TimelineLite({ paused: true });
+        this.section1ScrollBar.to(".scrollDown", 0.1, {
+          y: -50,
+          autoAlpha: 0
+        });
+        this.customScroll();
       });
     },
     customScroll() {
-      var html = document.documentElement;
-      var body = document.body;
+      this.html = document.documentElement;
+      this.body = document.body;
 
-      var scroller = {
+      this.scroller = {
         target: document.querySelector("#Home"),
-        ease: 0.05, // <= scroll speed
+        ease: 0.07, // <= scroll speed
         endY: 0,
         y: 0,
         resizeRequest: 1,
         scrollRequest: 0
       };
 
-      var requestId = null;
+      this.requestId = null;
 
-      TweenLite.set(scroller.target, {
+      TweenLite.set(this.scroller.target, {
         rotation: 0.01,
         force3D: true
       });
-      updateScroller();
-      window.addEventListener("resize", onResize);
-      document.addEventListener("scroll", onScroll);
+      this.updateScroller();
+      document.addEventListener("scroll", this.onScroll);
+    },
+    onScroll() {
+      this.scroller.scrollRequest++;
+      if (!this.requestId) {
+        this.requestId = requestAnimationFrame(this.updateScroller);
+      }
+    },
+    updateScroller() {
+      var resized = this.scroller.resizeRequest > 0;
 
-      function updateScroller() {
-        var resized = scroller.resizeRequest > 0;
-
-        if (resized) {
-          var height = scroller.target.clientHeight;
-          body.style.height = height + "px";
-          scroller.resizeRequest = 0;
-        }
-
-        var scrollY =
-          window.pageYOffset || html.scrollTop || body.scrollTop || 0;
-
-        scroller.endY = scrollY;
-        scroller.y += (scrollY - scroller.y) * scroller.ease;
-
-        if (Math.abs(scrollY - scroller.y) < 0.05 || resized) {
-          scroller.y = scrollY;
-          scroller.scrollRequest = 0;
-        }
-
-        TweenLite.set(scroller.target, {
-          y: -scroller.y
-        });
-
-        requestId =
-          scroller.scrollRequest > 0
-            ? requestAnimationFrame(updateScroller)
-            : null;
+      if (resized) {
+        var height = this.scroller.target.clientHeight;
+        this.body.style.height = height + "px";
+        this.scroller.resizeRequest = 0;
       }
 
-      function onScroll() {
-        scroller.scrollRequest++;
-        if (!requestId) {
-          requestId = requestAnimationFrame(updateScroller);
-        }
-      }
+      var scrollY =
+        window.pageYOffset || this.html.scrollTop || this.body.scrollTop || 0;
 
-      function onResize() {
-        scroller.resizeRequest++;
-        if (!requestId) {
-          requestId = requestAnimationFrame(updateScroller);
-        }
+      this.scroller.endY = scrollY;
+      this.scroller.y += (scrollY - this.scroller.y) * this.scroller.ease;
+
+      if (Math.abs(scrollY - this.scroller.y) < 0.05 || resized) {
+        this.scroller.y = scrollY;
+        this.scroller.scrollRequest = 0;
       }
+      let section1 =
+        this.scroller.y /
+        ((this.$refs.section1 && this.$refs.section1.clientHeight) ||
+          window.innerHeight);
+      if (this.section1 && section1 <= 1) {
+        const section1ScrollBar = section1 / 0.25;
+        if (this.section1ScrollBar && section1ScrollBar <= 1) {
+          this.section1ScrollBar.progress(section1ScrollBar);
+        }
+        if (section1 === 0) {
+          section1 = 0.00000001;
+        }
+        this.section1.progress(section1);
+      }
+      TweenLite.set(this.scroller.target, {
+        y: -this.scroller.y
+      });
+
+      this.requestId =
+        this.scroller.scrollRequest > 0
+          ? requestAnimationFrame(this.updateScroller)
+          : null;
     }
   }
 };
 </script>
 <style lang="scss">
-@import "@/main.scss";
+@import "@/App.scss";
 @keyframes bounce {
   0% {
     transform: translateY(0);
@@ -180,12 +223,22 @@ export default {
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
+        .Zindex1 {
+          position: relative;
+          z-index: 1;
+        }
+        .title-stroke-abs {
+          position: absolute;
+          width: 100%;
+          z-index: 1;
+          left: 0;
+          top: 0;
+        }
         .heading1-child {
           color: $primary;
           font-size: 0.3em;
           font-weight: 300;
           text-align: right;
-          mix-blend-mode: exclusion;
         }
         .lineHeight {
           line-height: 1.7em;
