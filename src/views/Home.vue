@@ -53,7 +53,7 @@ export default {
         y: undefined
       },
       markToolTip: {
-        file: "subbiah.gif",
+        file: "mark.gif",
         left: "0",
         top: "0",
         x: undefined,
