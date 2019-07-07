@@ -1,6 +1,39 @@
-import { TimelineLite, TweenLite, Power2 } from "gsap/all";
+import { TimelineLite, TweenLite, Power2, Linear } from "gsap/all";
+import ScrollMagic from "scrollmagic";
+import "imports-loader?define=>false!scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators";
+import "imports-loader?define=>false!scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap";
 import Vue from 'vue'
 
+export const guestNameAnimation = {
+	bind(el, binding) {
+		Vue.nextTick(() => {
+			let scale_tween;
+			const screenWidth = window.innerWidth;
+			if (screenWidth && screenWidth < 600) {
+				scale_tween = TweenLite.from(`.guestName${parseInt(binding.arg) + 1}`, 0.5, {
+					y: 200,
+					skewY: "-5deg",
+					autoAlpha: 0,
+					ease: Linear.easeNone
+				});
+			} else {
+				scale_tween = TweenLite.from(`.guestName${parseInt(binding.arg) + 1}`, 0.5, {
+					y: 100,
+					x: 20,
+					skewY: "-5deg",
+					autoAlpha: 0,
+					ease: Linear.easeNone
+				});
+			}
+			var controller = new ScrollMagic.Controller();
+			var scale_scene = new ScrollMagic.Scene({
+				triggerElement: `#section${parseInt(binding.arg) + 1}`,
+				offset: -100,
+			}).setTween(scale_tween);
+			controller.addScene([scale_scene]);
+		});
+	}
+}
 export const imageToolTipOnHover = {
 	bind(el, binding) {
 		Vue.nextTick(() => {

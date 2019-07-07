@@ -1,6 +1,12 @@
 <template>
   <div id="app">
     <loading />
+    <div
+      class="scrollBar"
+      v-bind:style="[isloading === false ? { mixBlendMode: 'exclusion' } : {}]"
+    >
+      <div class="scrollbar-track"></div>
+    </div>
     <transition :name="transitionName">
       <router-view v-if="isloading === false"></router-view>
     </transition>
@@ -62,5 +68,21 @@ export default {
   color: #2c3e50;
   width: 100vw;
   height: 400vh;
+  .scrollBar {
+    position: fixed;
+    z-index: 998;
+    height: 19.9vh;
+    width: 1px;
+    top: auto;
+    left: auto;
+    right: 50px;
+    bottom: 50px;
+    background-color: $primary;
+    .scrollbar-track {
+      width: 1px;
+      height: 3vh;
+      background-color: $backgroundColor;
+    }
+  }
 }
 </style>

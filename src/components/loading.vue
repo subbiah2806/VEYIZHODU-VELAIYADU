@@ -110,7 +110,8 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+@import "@/App.scss";
 #loading {
   position: fixed;
   top: 0;
@@ -122,7 +123,7 @@ export default {
   width: 100vw;
   height: 100vh;
   align-content: flex-start;
-  background-color: #1b1b1b;
+  background-color: $backgroundColor;
 }
 .box {
   background: white;

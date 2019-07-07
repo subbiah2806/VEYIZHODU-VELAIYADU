@@ -23,10 +23,19 @@
         </div>
       </section>
       <section class="fullHeight" v-for="(guest, index) in guests" v-bind:key="index">
-        <div class="section2">
-          <div :id="`guest-name${index+1}`">
-            <h1 v-if="guest.name" class="guestName h1-stroke">{{guest.name}}</h1>
-            <h1 v-if="guest.name" class="guestName zIndexmin1">{{guest.name}}</h1>
+        <div class="section2" :id="`section${index+1}`">
+          <div class="guestName-animate">
+            <h1
+              v-if="guest.name"
+              v-guest-name-animation:[index]
+              :class="`guestName${[index+1]}`"
+              class="guestName h1-stroke zindex1"
+            >{{guest.name}}</h1>
+            <h1
+              v-if="guest.name"
+              :class="`guestName${[index+1]}`"
+              class="guestName zIndexmin1"
+            >{{guest.name}}</h1>
           </div>
           <h1 :id="`guest-no${index+1}`" class="guestNo h1-stroke">{{guestCount(index +1)}}</h1>
           <div class="section2-media-div">
@@ -52,13 +61,14 @@
   </div>
 </template>
 <script>
-import { TimelineMax, TimelineLite, TweenLite } from "gsap/all";
-import { imageToolTipOnHover } from "../App.directive";
+import { TimelineLite, TweenLite } from "gsap/all";
+import { imageToolTipOnHover, guestNameAnimation } from "../App.directive";
 export default {
   name: "Home",
   props: {},
   directives: {
-    "img-tooltip": imageToolTipOnHover
+    "img-tooltip": imageToolTipOnHover,
+    "guest-name-animation": guestNameAnimation
   },
   data() {
     return {
@@ -119,9 +129,9 @@ export default {
   methods: {
     addAnimations() {
       this.$nextTick(() => {
-        const lt = new TimelineMax({});
-        lt.from("#Home", 2, { autoAlpha: 0 });
-        this.section1 = new TimelineMax({ paused: true });
+        const section1FaceIn = new TimelineLite({});
+        section1FaceIn.from("#Home", 2, { autoAlpha: 0 });
+        this.section1 = new TimelineLite({ paused: true });
         this.section1.to(".section1-scrollSkew", 0.1, {
           skewType: "simple",
           skewY: "12deg",
@@ -136,6 +146,60 @@ export default {
           y: -50,
           autoAlpha: 0
         });
+        const screenWidth = window.innerWidth;
+        if (screenWidth && screenWidth < 600) {
+          this.guests.forEach((guest, guestIndex) => {
+            const guestNo = guestIndex + 1;
+            this[`section${guestNo + 1}`] = new TimelineLite({ paused: true });
+            this[`section${guestNo + 1}`]
+              .to(`#guest-profession${guestNo}`, 0.1, {
+                y: -200
+              })
+              .to(
+                `#guest-no${guestNo}`,
+                0.1,
+                {
+                  x: -100
+                },
+                0
+              );
+          });
+        } else {
+          this.guests.forEach((guest, guestIndex) => {
+            const guestNo = guestIndex + 1;
+            this[`section${guestNo + 1}`] = new TimelineLite({ paused: true });
+            this[`section${guestNo + 1}`]
+              .to(`#guest-profession${guestNo}`, 0.1, {
+                y: 200
+              })
+              .to(
+                `#guest-img${guestNo}`,
+                0.1,
+                {
+                  scale: 1.2
+                },
+                0
+              )
+              .to(
+                `#guest-no${guestNo}`,
+                0.1,
+                {
+                  y: -100
+                },
+                0
+              )
+              .to(
+                `.guestName${guestNo}`,
+                0.1,
+                {
+                  x: -200
+                },
+                0
+              );
+          });
+        }
+        this.scrollBarAnimation = new TimelineLite({ paused: true });
+        this.scrollBarAnimation.to(".scrollbar-track", 0.1, { y: "17vh" });
         this.customScroll();
       });
     },
@@ -145,7 +209,7 @@ export default {
 
       this.scroller = {
         target: document.querySelector("#Home"),
-        ease: 0.07, // <= scroll speed
+        ease: 0.1, // <= scroll speed
         endY: 0,
         y: 0,
         resizeRequest: 1,
@@ -186,11 +250,10 @@ export default {
         this.scroller.y = scrollY;
         this.scroller.scrollRequest = 0;
       }
-      let section1 =
-        this.scroller.y /
-        ((this.$refs.section1 && this.$refs.section1.clientHeight) ||
-          window.innerHeight);
-      if (this.section1 && section1 <= 1) {
+      let scrollPercentage = (this.scroller.y / document.body.clientHeight) * 4;
+      this.scrollBarAnimation.progress(scrollPercentage / 3);
+      if (scrollPercentage <= 1) {
+        let section1 = scrollPercentage;
         const section1ScrollBar = section1 / 0.25;
         if (this.section1ScrollBar && section1ScrollBar <= 1) {
           this.section1ScrollBar.progress(section1ScrollBar);
@@ -199,6 +262,14 @@ export default {
           section1 = 0.00000001;
         }
         this.section1.progress(section1);
+      }
+      if (scrollPercentage > 0 && scrollPercentage <= 2) {
+        let section2 = scrollPercentage / 2;
+        this.section2.progress(section2);
+      }
+      if (scrollPercentage > 1 && scrollPercentage <= 3) {
+        let section3 = (scrollPercentage - 1) / 2;
+        this.section3.progress(section3);
       }
       TweenLite.set(this.scroller.target, {
         y: -this.scroller.y
@@ -310,7 +381,7 @@ export default {
           }
           @media (min-width: 576px) {
             top: 30px;
-            left: 20vw;
+            left: 36vw;
           }
         }
         .zIndexmin1 {
@@ -326,7 +397,7 @@ export default {
             font-size: 29vw;
             z-index: -1;
             top: 0;
-            right: 15vw;
+            right: 0;
           }
           @media (min-width: 576px) {
             font-size: 21vw;
@@ -337,7 +408,12 @@ export default {
         }
         .guest-profession {
           display: flex;
-          align-items: center;
+          @media (max-width: 575.98px) {
+            align-items: flex-end;
+          }
+          @media (min-width: 576px) {
+            align-items: center;
+          }
           .guest-profession-text {
             transform: rotate(90deg);
             text-transform: uppercase;
@@ -346,6 +422,7 @@ export default {
         }
         .section2-media-div {
           height: 95%;
+          overflow: hidden;
           @media (max-width: 575.98px) {
             width: 77vw;
           }

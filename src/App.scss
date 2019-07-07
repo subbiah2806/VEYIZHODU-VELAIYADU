@@ -1,9 +1,13 @@
 $primary: #fff;
 $primaryDull: hsla(0, 0%, 100%, 0.35);
 $secondary: rgb(118, 62, 223);
+$backgroundColor: #1b1b1b;
 @mixin textDefault {
   display: inline-block;
   color: #fff;
+}
+::-webkit-scrollbar {
+  width: 0px;  /* Remove scrollbar space */
 }
 .textDefaultFormat {
   @include textDefault;
@@ -40,6 +44,9 @@ a:hover {
 }
 .text-center {
   text-align: center;
+}
+.zindex1 {
+  z-index: 1;
 }
 @media (max-width: 575.98px) {
   h1 {
