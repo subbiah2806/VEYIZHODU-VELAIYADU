@@ -63,6 +63,7 @@
 <script>
 import { TimelineLite, TweenLite } from "gsap/all";
 import { imageToolTipOnHover, guestNameAnimation } from "../App.directive";
+import _ from "lodash";
 export default {
   name: "Home",
   props: {},
@@ -72,6 +73,7 @@ export default {
   },
   data() {
     return {
+      y: undefined,
       scrollAnimation: undefined,
       html: undefined,
       body: undefined,
@@ -107,6 +109,33 @@ export default {
       ]
     };
   },
+  watch: {
+    y: async function(to) {
+      if (to >= 0) {
+        let scrollPercentage = (to / document.body.clientHeight) * 4;
+        this.scrollBarAnimation.progress(scrollPercentage / 3);
+        if (scrollPercentage <= 1) {
+          const section1ScrollBar = scrollPercentage / 0.25;
+          if (this.section1ScrollBar && section1ScrollBar <= 1) {
+            this.section1ScrollBar.progress(section1ScrollBar);
+          }
+          this.section1.progress(scrollPercentage);
+        }
+        if (scrollPercentage > 0 && scrollPercentage <= 2) {
+          const section2 = scrollPercentage / 2;
+          // console.log("section2", section2);
+          this.section2.progress(section2);
+          // if (section2 > 0.3) {
+          //   this.section2name.progress(section2 - 0.3);
+          // }
+        }
+        if (scrollPercentage > 1 && scrollPercentage <= 3) {
+          const section3 = (scrollPercentage - 1) / 2;
+          this.section3.progress(section3);
+        }
+      }
+    }
+  },
   mounted() {
     const screenWidth = window.innerWidth;
     if (screenWidth && screenWidth < 600) {
@@ -130,24 +159,30 @@ export default {
     addAnimations() {
       this.$nextTick(() => {
         const section1FaceIn = new TimelineLite({});
-        section1FaceIn.from("#Home", 2, { autoAlpha: 0 });
+        section1FaceIn.from("#Home", 2, { autoAlpha: 0, rotation: 0.01 });
+        TweenLite.to(".section1-scrollSkew", 0.1, {
+          skewY: "0deg",
+          rotation: 0.01
+        });
         this.section1 = new TimelineLite({ paused: true });
         this.section1.to(".section1-scrollSkew", 0.1, {
-          skewType: "simple",
           skewY: "12deg",
-          autoAlpha: 0
+          autoAlpha: 0,
+          rotation: 0.01
         });
         TweenLite.to(".section2", 0.001, {
           skewType: "simple",
-          skewY: "0.0001deg"
+          skewY: "0.0001deg",
+          rotation: 0.01
         }).reverse();
         this.section1ScrollBar = new TimelineLite({ paused: true });
         this.section1ScrollBar.to(".scrollDown", 0.1, {
           y: -50,
-          autoAlpha: 0
+          autoAlpha: 0,
+          rotation: 0.01
         });
         const screenWidth = window.innerWidth;
-        if (screenWidth && screenWidth < 600) {
+        if (screenWidth && screenWidth < 575.98) {
           this.guests.forEach((guest, guestIndex) => {
             const guestNo = guestIndex + 1;
             this[`section${guestNo + 1}`] = new TimelineLite({ paused: true });
@@ -170,13 +205,15 @@ export default {
             this[`section${guestNo + 1}`] = new TimelineLite({ paused: true });
             this[`section${guestNo + 1}`]
               .to(`#guest-profession${guestNo}`, 0.1, {
-                y: 200
+                y: 200,
+                rotation: 90.01
               })
               .to(
                 `#guest-img${guestNo}`,
                 0.1,
                 {
-                  scale: 1.2
+                  scale: 1.2,
+                  rotation: 0.01
                 },
                 0
               )
@@ -184,7 +221,8 @@ export default {
                 `#guest-no${guestNo}`,
                 0.1,
                 {
-                  y: -100
+                  y: -100,
+                  rotation: 90.01
                 },
                 0
               )
@@ -192,7 +230,8 @@ export default {
                 `.guestName${guestNo}`,
                 0.1,
                 {
-                  x: -200
+                  x: -200,
+                  rotation: 0.01
                 },
                 0
               );
@@ -211,11 +250,10 @@ export default {
         target: document.querySelector("#Home"),
         ease: 0.1, // <= scroll speed
         endY: 0,
-        y: 0,
         resizeRequest: 1,
         scrollRequest: 0
       };
-
+      this.y = 0;
       this.requestId = null;
 
       TweenLite.set(this.scroller.target, {
@@ -223,7 +261,10 @@ export default {
         force3D: true
       });
       this.updateScroller();
-      document.addEventListener("scroll", this.onScroll);
+      const throttleScroll = _.throttle(this.onScroll, 100, {
+        trailing: false
+      });
+      document.addEventListener("scroll", throttleScroll, true);
     },
     onScroll() {
       this.scroller.scrollRequest++;
@@ -244,37 +285,18 @@ export default {
         window.pageYOffset || this.html.scrollTop || this.body.scrollTop || 0;
 
       this.scroller.endY = scrollY;
-      this.scroller.y += (scrollY - this.scroller.y) * this.scroller.ease;
+      this.y += (scrollY - this.y) * this.scroller.ease;
 
-      if (Math.abs(scrollY - this.scroller.y) < 0.05 || resized) {
-        this.scroller.y = scrollY;
+      if (Math.abs(scrollY - this.y) < 0.05 || resized) {
+        this.y = scrollY;
         this.scroller.scrollRequest = 0;
       }
-      let scrollPercentage = (this.scroller.y / document.body.clientHeight) * 4;
-      this.scrollBarAnimation.progress(scrollPercentage / 3);
-      if (scrollPercentage <= 1) {
-        let section1 = scrollPercentage;
-        const section1ScrollBar = section1 / 0.25;
-        if (this.section1ScrollBar && section1ScrollBar <= 1) {
-          this.section1ScrollBar.progress(section1ScrollBar);
-        }
-        if (section1 === 0) {
-          section1 = 0.00000001;
-        }
-        this.section1.progress(section1);
+      const screenWidth = window.innerWidth;
+      if (screenWidth && screenWidth < 575.98) {
+        TweenLite.set(this.scroller.target, {
+          y: -this.y
+        });
       }
-      if (scrollPercentage > 0 && scrollPercentage <= 2) {
-        let section2 = scrollPercentage / 2;
-        this.section2.progress(section2);
-      }
-      if (scrollPercentage > 1 && scrollPercentage <= 3) {
-        let section3 = (scrollPercentage - 1) / 2;
-        this.section3.progress(section3);
-      }
-      TweenLite.set(this.scroller.target, {
-        y: -this.scroller.y
-      });
-
       this.requestId =
         this.scroller.scrollRequest > 0
           ? requestAnimationFrame(this.updateScroller)
@@ -311,7 +333,9 @@ export default {
   }
 }
 #Home {
-  position: fixed;
+  @media (max-width: 575.98px) {
+    position: fixed;
+  }
   @media (min-width: 576px) {
     display: flex;
   }

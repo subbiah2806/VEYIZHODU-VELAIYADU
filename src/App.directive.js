@@ -2,6 +2,7 @@ import { TimelineLite, TweenLite, Power2, Linear } from "gsap/all";
 import ScrollMagic from "scrollmagic";
 import "imports-loader?define=>false!scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators";
 import "imports-loader?define=>false!scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap";
+// import "imports-loader?define=>false!scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators.js";
 import Vue from 'vue'
 
 export const guestNameAnimation = {
@@ -9,19 +10,21 @@ export const guestNameAnimation = {
 		Vue.nextTick(() => {
 			let scale_tween;
 			const screenWidth = window.innerWidth;
-			if (screenWidth && screenWidth < 600) {
+			if (screenWidth && screenWidth < 575.98) {
 				scale_tween = TweenLite.from(`.guestName${parseInt(binding.arg) + 1}`, 0.5, {
 					y: 200,
 					skewY: "-5deg",
 					autoAlpha: 0,
+					rotation: 90.01,
 					ease: Linear.easeNone
 				});
 			} else {
-				scale_tween = TweenLite.from(`.guestName${parseInt(binding.arg) + 1}`, 0.5, {
+				scale_tween = TweenLite.from(`.guestName${parseInt(binding.arg) + 1}`, 0.25, {
 					y: 100,
 					x: 20,
 					skewY: "-5deg",
 					autoAlpha: 0,
+					rotation: 0.01,
 					ease: Linear.easeNone
 				});
 			}
@@ -31,6 +34,38 @@ export const guestNameAnimation = {
 				offset: -100,
 			}).setTween(scale_tween);
 			controller.addScene([scale_scene]);
+
+			// const tween = new TimelineMax();
+
+			// tween.staggerFromTo(`.guestName${parseInt(binding.arg) + 1}`, 1, {
+			// 	y: 100,
+			// 	x: 20,
+			// 	skewY: "-5deg",
+			// 	autoAlpha: 0,
+			// 	rotation: 0.01
+			// }, {
+			// 		y: 0,
+			// 		x: 0,
+			// 		skewY: "0deg",
+			// 		autoAlpha: 1,
+			// 		ease: Linear.easeNone,
+			// 		rotation: 0.01
+			// 	}, 0)
+			// 	.to(`.guestName${parseInt(binding.arg) + 1}`, 1, {
+			// 		x: -200
+			// 	});
+
+			// build scene
+			// var scene = new ScrollMagic.Scene({
+			// 	triggerElement: `#section${parseInt(binding.arg) + 1}`,
+			// 	offset: -100,
+			// 	duration: '110%'
+			// })
+			// 	.setTween(tween)
+			// 	.addIndicators({ name: "staggering" }) // add indicators (requires plugin)
+
+			// 	.addTo(controller);
+
 		});
 	}
 }

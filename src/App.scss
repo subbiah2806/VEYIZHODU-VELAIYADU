@@ -6,8 +6,12 @@ $backgroundColor: #1b1b1b;
   display: inline-block;
   color: #fff;
 }
-::-webkit-scrollbar {
-  width: 0px;  /* Remove scrollbar space */
+/* Remove scrollbar space */
+html {
+  scrollbar-width: none; //firefox
+  ::-webkit-scrollbar {
+    width: 0px;  //chrome
+  }
 }
 .textDefaultFormat {
   @include textDefault;
