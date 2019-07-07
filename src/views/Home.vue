@@ -22,8 +22,30 @@
           <!-- <img src="../assets/website-logo.png" class="img" /> -->
         </div>
       </section>
-      <section class="fullHeight"></section>
-      <section class="fullHeight"></section>
+      <section class="fullHeight" v-for="(guest, index) in guests" v-bind:key="index">
+        <div class="section2">
+          <div :id="`guest-name${index+1}`">
+            <h1 v-if="guest.name" class="guestName h1-stroke">{{guest.name}}</h1>
+            <h1 v-if="guest.name" class="guestName zIndexmin1">{{guest.name}}</h1>
+          </div>
+          <h1 :id="`guest-no${index+1}`" class="guestNo h1-stroke">{{guestCount(index +1)}}</h1>
+          <div class="section2-media-div">
+            <div
+              :id="`guest-img${index+1}`"
+              v-if="guest.image"
+              class="media"
+              :style="{ backgroundImage: `url('${require(`../assets/${guest.image}`)}')`}"
+            ></div>
+          </div>
+          <div class="guest-profession">
+            <div
+              :id="`guest-profession${index+1}`"
+              v-if="guest.profession"
+              class="guest-profession-text textDefaultFormat"
+            >{{guest.profession}}</div>
+          </div>
+        </div>
+      </section>
       <section class="fullHeight"></section>
     </div>
     <h1 class="Home-right">hi</h1>
@@ -58,7 +80,21 @@ export default {
         top: "0",
         x: undefined,
         y: undefined
-      }
+      },
+      guests: [
+        {
+          name: "Ramar",
+          image: "ramar.jpeg",
+          color: "red",
+          profession: "comedian"
+        },
+        {
+          name: "Andrews",
+          image: "guest2.jpg",
+          color: "blue",
+          profession: "anchor"
+        }
+      ]
     };
   },
   mounted() {
@@ -91,6 +127,10 @@ export default {
           skewY: "12deg",
           autoAlpha: 0
         });
+        TweenLite.to(".section2", 0.001, {
+          skewType: "simple",
+          skewY: "0.0001deg"
+        }).reverse();
         this.section1ScrollBar = new TimelineLite({ paused: true });
         this.section1ScrollBar.to(".scrollDown", 0.1, {
           y: -50,
@@ -168,6 +208,9 @@ export default {
         this.scroller.scrollRequest > 0
           ? requestAnimationFrame(this.updateScroller)
           : null;
+    },
+    guestCount(index) {
+      return index < 10 ? `0${index}` : index;
     }
   }
 };
@@ -252,6 +295,70 @@ export default {
           .scrollDownArrow {
             animation: 1s cubic-bezier(0.64, 0.15, 0.32, 0.9) infinite
               inner-bounce;
+          }
+        }
+      }
+      .section2 {
+        height: 100vh;
+        padding: 10vh 10vw 70px 0;
+        display: flex;
+        .guestName {
+          position: absolute;
+          @media (max-width: 575.98px) {
+            transform-origin: 49px 18px;
+            transform: rotate(90deg);
+          }
+          @media (min-width: 576px) {
+            top: 30px;
+            left: 20vw;
+          }
+        }
+        .zIndexmin1 {
+          z-index: -1;
+        }
+        .guestNo {
+          position: absolute;
+          font-family: Ilisarniq, sans-serif;
+          -webkit-text-stroke: 1px #fff;
+          color: transparent;
+          opacity: 0.4;
+          @media (max-width: 575.98px) {
+            font-size: 29vw;
+            z-index: -1;
+            top: 0;
+            right: 15vw;
+          }
+          @media (min-width: 576px) {
+            font-size: 21vw;
+            top: 30vh;
+            right: -14vw;
+            transform: rotate(90deg);
+          }
+        }
+        .guest-profession {
+          display: flex;
+          align-items: center;
+          .guest-profession-text {
+            transform: rotate(90deg);
+            text-transform: uppercase;
+            margin-bottom: 10em;
+          }
+        }
+        .section2-media-div {
+          height: 95%;
+          @media (max-width: 575.98px) {
+            width: 77vw;
+          }
+          @media (min-width: 576px) {
+            width: 68vw;
+          }
+          .media {
+            width: 100%;
+            height: 100%;
+            background-position: 50% 0%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: scroll;
           }
         }
       }
