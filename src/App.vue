@@ -1,15 +1,16 @@
 <template>
   <div id="app">
     <loading />
-    <div
-      class="scrollBar"
-      v-bind:style="[isloading === false ? { mixBlendMode: 'exclusion' } : {}]"
-    >
-      <div class="scrollbar-track"></div>
+    <div v-if="isloading === false">
+      <div class="scrollBar">
+        <div class="scrollbar-track"></div>
+      </div>
+      <div v-if="isnotmobile()" class="mousepointer" id="mousePointer"></div>
+      <div v-if="isnotmobile()" class="mousepointer" id="mousePointer-center"></div>
+      <transition :name="transitionName">
+        <router-view></router-view>
+      </transition>
     </div>
-    <transition :name="transitionName">
-      <router-view v-if="isloading === false"></router-view>
-    </transition>
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import { mapGetters, mapActions } from "vuex";
 import Vue from "vue";
 import VueMaterial from "vue-material";
 import "vue-material/dist/vue-material.min.css";
+import { TweenLite, Power2 } from "gsap/all";
 
 Vue.use(VueMaterial);
 export default {
@@ -44,6 +46,30 @@ export default {
         payload: "stop"
       });
     }, 5000);
+    window.addEventListener("mousemove", this.moveCircle, true);
+  },
+  destroyed() {
+    window.removeEventListener("mousemove", e => this.moveCircle(e));
+  },
+  methods: {
+    moveCircle(e) {
+      TweenLite.to("#mousePointer", 0.5, {
+        css: {
+          x: e.clientX,
+          y: e.clientY
+        },
+        ease: Power2.easeOuts
+      });
+      TweenLite.to("#mousePointer-center", 0.001, {
+        css: {
+          x: e.clientX,
+          y: e.clientY
+        }
+      });
+    },
+    isnotmobile() {
+      return window.innerWidth > 575.98;
+    }
   },
   watch: {
     $route(to, from) {
@@ -64,6 +90,32 @@ export default {
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  @media (min-width: 576px) {
+    cursor: none;
+  }
+  .mousepointer {
+    position: fixed;
+    pointer-events: none;
+    z-index: 998;
+    border-radius: 80%;
+  }
+  #mousePointer {
+    top: 0;
+    left: 0;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    border: 1px solid $primary;
+    mix-blend-mode: exclusion;
+    backface-visibility: hidden;
+  }
+  #mousePointer-center {
+    top: -2px;
+    left: -2px;
+    width: 4px;
+    height: 4px;
+    background: $primary;
+  }
   .scrollBar {
     position: fixed;
     z-index: 998;
@@ -73,6 +125,7 @@ export default {
     left: auto;
     right: 50px;
     bottom: 50px;
+    mix-blend-mode: exclusion;
     background-color: $primary;
     .scrollbar-track {
       width: 1px;
