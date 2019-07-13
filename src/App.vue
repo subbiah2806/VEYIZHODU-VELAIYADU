@@ -6,10 +6,14 @@
         <div class="scrollbar-track"></div>
       </div>
       <div v-if="isnotmobile()" class="mousepointer" id="mousePointer"></div>
-      <div v-if="isnotmobile()" class="mousepointer" id="mousePointer-center"></div>
       <transition :name="transitionName">
         <router-view></router-view>
       </transition>
+      <div class="Home-right" @mouseover="menuAnimate(true)" @mouseleave="menuAnimate(false)"></div>
+      <div class="follower">
+        <div class="dash dash-top"></div>
+        <div class="dash dash-bottom"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -21,7 +25,7 @@ import { mapGetters, mapActions } from "vuex";
 import Vue from "vue";
 import VueMaterial from "vue-material";
 import "vue-material/dist/vue-material.min.css";
-import { TweenLite, Power2 } from "gsap/all";
+import { TweenLite, TweenMax, Back, Sine, TimelineMax, Power2 } from "gsap/all";
 
 Vue.use(VueMaterial);
 export default {
@@ -32,7 +36,8 @@ export default {
   data() {
     return {
       transitionName: undefined,
-      isloading: true
+      isloading: true,
+      moveTrg: undefined
     };
   },
   computed: {
@@ -46,7 +51,26 @@ export default {
         payload: "stop"
       });
     }, 5000);
-    window.addEventListener("mousemove", this.moveCircle, true);
+    this.menu = new TimelineMax({ paused: true });
+    this.menu.to(".dash-top", 0.1, {
+      rotation: 90,
+      y: 5
+    });
+    this.menu
+      .to(
+        ".dash-bottom",
+        0.1,
+        {
+          y: -5
+        },
+        0
+      )
+      .to(".dash", 0.1, {
+        rotation: "+=360"
+      });
+    if (this.isnotmobile()) {
+      window.addEventListener("mousemove", this.moveCircle, true);
+    }
   },
   destroyed() {
     window.removeEventListener("mousemove", e => this.moveCircle(e));
@@ -60,15 +84,52 @@ export default {
         },
         ease: Power2.easeOuts
       });
-      TweenLite.to("#mousePointer-center", 0.001, {
-        css: {
+      if (this.moveMenu) {
+        TweenMax.to(".follower", 0.5, {
           x: e.clientX,
-          y: e.clientY
+          y: e.clientY,
+          ease: Sine.easeOut
+        });
+        if (!this.increasedmousePointer) {
+          this.increasedmousePointer = true;
+          TweenMax.to("#mousePointer", 0.5, {
+            scale: 1.5,
+            background: "white"
+          });
         }
-      });
+      } else {
+        this.increasedmousePointer = false;
+        const menu = new TimelineMax({ paused: true });
+        menu
+          .to(".follower", 1, {
+            x: this.center.x,
+            y: this.center.y,
+            ease: Back.easeOut
+          })
+          .to(
+            "#mousePointer",
+            0.5,
+            {
+              scale: 1
+            },
+            0
+          );
+        menu.play();
+      }
     },
     isnotmobile() {
       return window.innerWidth > 575.98;
+    },
+    menuAnimate(animate) {
+      if (this.isnotmobile()) {
+        if (animate) {
+          this.menu.play();
+          this.moveMenu = true;
+        } else {
+          this.menu.reverse();
+          this.moveMenu = false;
+        }
+      }
     }
   },
   watch: {
@@ -79,6 +140,23 @@ export default {
     },
     getLoading(currentValue) {
       this.isloading = currentValue;
+    },
+    isloading(value) {
+      if (value === false) {
+        this.$nextTick(() => {
+          const menuContainer = document.querySelector(".Home-right");
+          const menuContainerRect = menuContainer.getBoundingClientRect();
+          this.center = {
+            x: menuContainerRect.right - menuContainerRect.width / 2,
+            y: menuContainerRect.top + menuContainerRect.height / 2
+          };
+          TweenMax.to(".follower", 0.1, {
+            x: this.center.x,
+            y: this.center.y,
+            ease: Back.easeOut
+          });
+        });
+      }
     }
   }
 };
@@ -92,6 +170,48 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   @media (min-width: 576px) {
     cursor: none;
+  }
+  .Home-right {
+    position: fixed;
+    z-index: 1001;
+    border-radius: 80%;
+    mix-blend-mode: exclusion;
+    @media (max-width: 575.98px) {
+      width: 55px;
+      height: 55px;
+      margin: -27.5px 0 0 -27.5px;
+      bottom: 10px;
+      right: 10px;
+    }
+    @media (min-width: 576px) {
+      width: 100px;
+      height: 100px;
+      margin: -50px 0 0 -50px;
+      top: 60px;
+      right: 30px;
+    }
+  }
+  .follower {
+    position: fixed;
+    mix-blend-mode: exclusion;
+    top: 0;
+    left: 0;
+    width: 55px;
+    height: 55px;
+    margin: -27.5px 0 0 -27.5px;
+    border-radius: 80%;
+    background: hsl(0, 0%, 98%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    .dash {
+      height: 2px;
+      width: 20px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      background-color: #111;
+    }
   }
   .mousepointer {
     position: fixed;
@@ -108,13 +228,7 @@ export default {
     border: 1px solid $primary;
     mix-blend-mode: exclusion;
     backface-visibility: hidden;
-  }
-  #mousePointer-center {
-    top: -2px;
-    left: -2px;
-    width: 4px;
-    height: 4px;
-    background: $primary;
+    background: white;
   }
   .scrollBar {
     position: fixed;
@@ -123,10 +237,16 @@ export default {
     width: 1px;
     top: auto;
     left: auto;
-    right: 50px;
-    bottom: 50px;
     mix-blend-mode: exclusion;
     background-color: $primary;
+    @media (max-width: 575.98px) {
+      right: 10px;
+      bottom: 20vh;
+    }
+    @media (min-width: 576px) {
+      right: 50px;
+      bottom: 50px;
+    }
     .scrollbar-track {
       width: 1px;
       height: 3vh;

@@ -19,7 +19,6 @@
             SCROLL DOWN
             <i class="material-icons scrollDownArrow">keyboard_arrow_down</i>
           </div>
-          <!-- <img src="../assets/website-logo.png" class="img" /> -->
         </div>
       </section>
       <section class="fullHeight" v-for="(guest, index) in guests" v-bind:key="index">
@@ -37,7 +36,10 @@
               class="guestName zIndexmin1"
             >{{guest.name}}</h1>
           </div>
-          <h1 :id="`guest-no${index+1}`" class="guestNo h1-stroke">{{guestCount(index +1)}}</h1>
+          <h1
+            :id="`guest-no${index+1}`"
+            class="guestNo h1-stroke colorChange"
+          >{{guestCount(index +1)}}</h1>
           <div class="section2-media-div">
             <div
               :id="`guest-img${index+1}`"
@@ -57,11 +59,10 @@
       </section>
       <section class="fullHeight"></section>
     </div>
-    <h1 class="Home-right">hi</h1>
   </div>
 </template>
 <script>
-import { TimelineLite, TweenLite } from "gsap/all";
+import { TimelineLite, TimelineMax, TweenLite, Expo } from "gsap/all";
 import { imageToolTipOnHover, guestNameAnimation } from "../App.directive";
 import _ from "lodash";
 export default {
@@ -123,11 +124,7 @@ export default {
         }
         if (scrollPercentage > 0 && scrollPercentage <= 2) {
           const section2 = scrollPercentage / 2;
-          // console.log("section2", section2);
           this.section2.progress(section2);
-          // if (section2 > 0.3) {
-          //   this.section2name.progress(section2 - 0.3);
-          // }
         }
         if (scrollPercentage > 1 && scrollPercentage <= 3) {
           const section3 = (scrollPercentage - 1) / 2;
@@ -240,6 +237,30 @@ export default {
         this.scrollBarAnimation = new TimelineLite({ paused: true });
         this.scrollBarAnimation.to(".scrollbar-track", 0.1, { y: "17vh" });
         this.customScroll();
+        function sample(list) {
+          return function() {
+            return list[Math.floor(Math.random() * list.length)];
+          };
+        }
+        function random(min, max) {
+          if (max == null) {
+            max = min;
+            min = 0;
+          }
+          return function() {
+            return Math.random() * (max - min) + min;
+          };
+        }
+        var colors = ["#1af890", "#DF0A0A", "#5219AA", "#7E0DC9", "#CF368D"];
+        var tl = new TimelineMax({ repeat: -1 });
+        for (let i = 0; i < 25; i++) {
+          tl.to(".colorChange", 1, {
+            webkitTextStrokeColor: sample(colors),
+            repeatDelay: 1,
+            alpha: random(0.6, 1),
+            ease: Expo.easeOut
+          });
+        }
       });
     },
     customScroll() {
@@ -416,7 +437,6 @@ export default {
           font-family: Ilisarniq, sans-serif;
           -webkit-text-stroke: 1px #fff;
           color: transparent;
-          opacity: 0.4;
           @media (max-width: 575.98px) {
             font-size: 29vw;
             z-index: -1;
@@ -463,15 +483,6 @@ export default {
           }
         }
       }
-    }
-  }
-  .Home-right {
-    //mobile
-    @media (max-width: 575.98px) {
-    }
-    //desktop
-    @media (min-width: 576px) {
-      width: 10vw;
     }
   }
 }
