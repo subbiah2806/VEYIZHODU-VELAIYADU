@@ -51,26 +51,6 @@ export default {
         payload: "stop"
       });
     }, 5000);
-    this.menu = new TimelineMax({ paused: true });
-    this.menu.to(".dash-top", 0.1, {
-      rotation: 90,
-      y: 5
-    });
-    this.menu
-      .to(
-        ".dash-bottom",
-        0.1,
-        {
-          y: -5
-        },
-        0
-      )
-      .to(".dash", 0.1, {
-        rotation: "+=360"
-      });
-    if (this.isnotmobile()) {
-      window.addEventListener("mousemove", this.moveCircle, true);
-    }
   },
   destroyed() {
     window.removeEventListener("mousemove", e => this.moveCircle(e));
@@ -155,6 +135,26 @@ export default {
             y: this.center.y,
             ease: Back.easeOut
           });
+          this.menu = new TimelineMax({ paused: true });
+          this.menu.to(".dash-top", 0.1, {
+            rotation: 90,
+            y: 5
+          });
+          this.menu
+            .to(
+              ".dash-bottom",
+              0.1,
+              {
+                y: -5
+              },
+              0
+            )
+            .to(".dash", 0.1, {
+              rotation: "+=360"
+            });
+          if (this.isnotmobile()) {
+            window.addEventListener("mousemove", this.moveCircle, true);
+          }
         });
       }
     }
@@ -180,8 +180,8 @@ export default {
       width: 55px;
       height: 55px;
       margin: -27.5px 0 0 -27.5px;
-      bottom: 10px;
-      right: 10px;
+      top: 50vh;
+      right: 0;
     }
     @media (min-width: 576px) {
       width: 100px;
@@ -196,21 +196,33 @@ export default {
     mix-blend-mode: exclusion;
     top: 0;
     left: 0;
-    width: 55px;
-    height: 55px;
-    margin: -27.5px 0 0 -27.5px;
     border-radius: 80%;
     background: hsl(0, 0%, 98%);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    @media (max-width: 575.98px) {
+      width: 40px;
+      height: 40px;
+      margin: -20px 0 0 -20px;
+    }
+    @media (min-width: 576px) {
+      width: 55px;
+      height: 55px;
+      margin: -27.5px 0 0 -27.5px;
+    }
     .dash {
       height: 2px;
-      width: 20px;
       margin-top: 5px;
       margin-bottom: 5px;
       background-color: #111;
+      @media (max-width: 575.98px) {
+        width: 15px;
+      }
+      @media (min-width: 576px) {
+        width: 20px;
+      }
     }
   }
   .mousepointer {
@@ -241,7 +253,7 @@ export default {
     background-color: $primary;
     @media (max-width: 575.98px) {
       right: 10px;
-      bottom: 20vh;
+      bottom: 50px;
     }
     @media (min-width: 576px) {
       right: 50px;

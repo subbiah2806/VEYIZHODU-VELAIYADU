@@ -57,12 +57,35 @@
           </div>
         </div>
       </section>
-      <section class="fullHeight"></section>
+      <section class="fullHeight" ref="section4">
+        <div :class="['section4',sectop4Top ? 'section4-top' : '']">
+          <h1 class="section4-text" id="section4text">
+            <div
+              v-for="(text, textIndex) in section4Text"
+              v-bind:key="textIndex"
+              v-bind:class="[text.name, text.class]"
+              class="space"
+            ></div>
+            <div :class="['space', 'scw', nobackground? 'nobackground': '']"></div>
+            <span id="cursor">|</span>
+          </h1>
+          <video autoplay muted loop id="myVideo" class="myVideo">
+            <source src="../assets/rain.mp4" type="video/mp4" />
+          </video>
+          <video autoplay muted loop id="ramarVideo" class="myVideo">
+            <source src="../assets/ramar-video.mp4" type="video/mp4" />
+          </video>
+          <video autoplay muted loop id="andrewVideo" class="myVideo">
+            <source src="../assets/andrews-video.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 <script>
-import { TimelineLite, TimelineMax, TweenLite, Expo } from "gsap/all";
+/* eslint-disable */
+import { TimelineLite, TimelineMax, Linear, TweenLite, Expo } from "gsap/all";
 import { imageToolTipOnHover, guestNameAnimation } from "../App.directive";
 import _ from "lodash";
 export default {
@@ -107,7 +130,13 @@ export default {
           color: "blue",
           profession: "anchor"
         }
-      ]
+      ],
+      lastAnimation: false,
+      mountedScroll: false,
+      section4Text: [],
+      sectop4Top: false,
+      cursor: true,
+      nobackground: false
     };
   },
   watch: {
@@ -129,6 +158,243 @@ export default {
         if (scrollPercentage > 1 && scrollPercentage <= 3) {
           const section3 = (scrollPercentage - 1) / 2;
           this.section3.progress(section3);
+          if (scrollPercentage >= 2.5) {
+            if (!this.lastAnimation && this.mountedScroll) {
+              this.lastAnimation = true;
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth"
+              });
+              const existingStyle = this.body.getAttribute("style");
+              this.body.setAttribute(
+                "style",
+                `existingStylez${existingStyle} overflow: hidden;`
+              );
+              const printText = "We are coming to SINGAPORE";
+              const printTextSplit = printText.split(" ");
+              const section4text = document.getElementById("section4text");
+              printTextSplit.forEach((splitValue, index) => {
+                const weAreComing = {
+                  name: `sc-${index}`
+                };
+                if (splitValue === "SINGAPORE") {
+                  weAreComing.class = "colorSc";
+                }
+                this.section4Text.push(weAreComing);
+              });
+              TweenMax.fromTo(
+                "#cursor",
+                1,
+                {
+                  autoAlpha: 0
+                },
+                {
+                  autoAlpha: 1,
+                  repeat: -1,
+                  ease: SteppedEase.config(1)
+                }
+              );
+              TweenLite.to("#section4text", 0.001, {
+                alpha: 1
+              });
+              this.menudis = new TimelineLite({ paused: true });
+              this.menudis
+                .to(
+                  ".follower",
+                  0.5,
+                  {
+                    alpha: 0
+                  },
+                  0
+                )
+                .to(
+                  ".scrollBar",
+                  0.5,
+                  {
+                    alpha: 0
+                  },
+                  0
+                );
+              if (this.isnotmobile()) {
+                this.menudis.to(
+                  "#mousePointer",
+                  0.5,
+                  {
+                    alpha: 0
+                  },
+                  0
+                );
+              }
+              this.menudis.play();
+              this.$nextTick(() => {
+                this.sequence = new TimelineLite();
+                const ani1 = new TimelineLite();
+                printTextSplit.forEach((splitValue, index) => {
+                  ani1.to(`.sc-${index}`, 1, {
+                    text: `${splitValue}`,
+                    ease: Linear.easeNone
+                  });
+                  if (index < printTextSplit.length - 1) {
+                    ani1.to(`.sc-${index}`, 0.0001, {
+                      text: `${splitValue}&nbsp`,
+                      ease: Linear.easeNone
+                    });
+                  }
+                });
+                const ani2 = new TimelineLite();
+                ani2
+                  .to(
+                    "#myVideo",
+                    2,
+                    {
+                      alpha: 1,
+                      ease: Linear.easeNone
+                    },
+                    0
+                  )
+                  .to(
+                    `#section4text`,
+                    1,
+                    {
+                      alpha: 0,
+                      ease: Linear.easeNone
+                    },
+                    "-=1"
+                  )
+                  .add(() => {
+                    this.section4Text = [];
+                  })
+                  .to(`#section4text`, 0.001, {
+                    sclae: 0.6,
+                    alpha: 1,
+                    ease: Linear.easeNone
+                  })
+                  .to("#cursor", 0.001, {
+                    alpha: 0
+                  })
+                  .to(`.scw`, 2, {
+                    text: `to entertain you`,
+                    yoyo: true,
+                    repeat: 1,
+                    repeatDelay: 1,
+                    ease: Linear.easeNone
+                  })
+                  .to(`.scw`, 4, {
+                    text: `take a break from work and have some fun`,
+                    yoyo: true,
+                    repeat: 1,
+                    repeatDelay: 1,
+                    ease: Linear.easeNone
+                  })
+                  .add(() => {
+                    this.sectop4Top = true;
+                  })
+                  .to("#myVideo", 1, {
+                    alpha: 0,
+                    ease: Linear.easeNone
+                  })
+                  .to("#ramarVideo", 1, {
+                    alpha: 1,
+                    ease: Linear.easeNone
+                  })
+                  .to(
+                    `.scw`,
+                    1,
+                    {
+                      text: `ramar`,
+                      ease: Linear.easeNone
+                    },
+                    "-=1"
+                  )
+                  .to(
+                    "#ramarVideo",
+                    1,
+                    {
+                      alpha: 0,
+                      ease: Linear.easeNone
+                    },
+                    "+=2"
+                  )
+                  .to(
+                    ".scw",
+                    1,
+                    {
+                      text: "",
+                      ease: Linear.easeNone
+                    },
+                    "-=2"
+                  )
+                  .to("#andrewVideo", 1.5, {
+                    alpha: 1,
+                    ease: Linear.easeNone
+                  })
+                  .to(
+                    `.scw`,
+                    1,
+                    {
+                      text: `ANDREWS`,
+                      ease: Linear.easeNone
+                    },
+                    "-=1.5"
+                  )
+                  .to(
+                    "#andrewVideo",
+                    1,
+                    {
+                      alpha: 0,
+                      ease: Linear.easeNone
+                    },
+                    "+=2"
+                  )
+                  .to(
+                    ".scw",
+                    1,
+                    {
+                      text: "",
+                      ease: Linear.easeNone
+                    },
+                    "-=2"
+                  )
+                  .add(() => {
+                    this.sectop4Top = false;
+                    this.nobackground = true;
+                  })
+                  .fromTo(
+                    "#cursor",
+                    1,
+                    {
+                      autoAlpha: 0
+                    },
+                    {
+                      autoAlpha: 1,
+                      repeat: -1,
+                      ease: SteppedEase.config(1)
+                    }
+                  )
+                  .to(`.scw`, 1, {
+                    text: `THE END...`,
+                    ease: Linear.easeNone
+                  })
+                  .add(() => {
+                    setTimeout(() => {
+                      const existingStyle = this.body.getAttribute("style");
+                      existingStyle.replace("overflow: hidden;", "");
+                      this.body.setAttribute(
+                        "style",
+                        existingStyle.replace("overflow: hidden;", "")
+                      );
+                      window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                      });
+                    }, 2000);
+                  });
+                this.sequence.add([ani1, ani2], "+=1", "sequence", 1);
+              });
+            }
+          } else if (this.lastAnimation) {
+            this.removeSection4Animation();
+          }
         }
       }
     }
@@ -147,12 +413,41 @@ export default {
       top: 0,
       behavior: "smooth"
     });
+    setTimeout(() => {
+      this.mountedScroll = true;
+    }, 1000);
     this.addAnimations();
   },
   destroyed() {
     document.removeEventListener("scroll", this.onScroll);
   },
   methods: {
+    isnotmobile() {
+      return window.innerWidth > 575.98;
+    },
+    removeSection4Animation() {
+      this.lastAnimation = false;
+      this.sequence.kill();
+      this.menudis.reverse();
+      this.section4Text = [];
+      this.sectop4Top = false;
+      this.nobackground = false;
+      const videos = new TimelineLite();
+      videos
+        .to(".myVideo", 1, {
+          alpha: 0,
+          ease: Linear.easeNone
+        })
+        .to(
+          ".scw",
+          1,
+          {
+            text: "",
+            ease: Linear.easeNone
+          },
+          "-=1"
+        );
+    },
     addAnimations() {
       this.$nextTick(() => {
         const section1FaceIn = new TimelineLite({});
@@ -168,6 +463,11 @@ export default {
           rotation: 0.01
         });
         TweenLite.to(".section2", 0.001, {
+          skewType: "simple",
+          skewY: "0.0001deg",
+          rotation: 0.01
+        }).reverse();
+        TweenLite.to(".section4", 0.001, {
           skewType: "simple",
           skewY: "0.0001deg",
           rotation: 0.01
@@ -362,12 +662,7 @@ export default {
   }
   overflow: hidden;
   .Home-left {
-    @media (max-width: 575.98px) {
-      width: 100vw;
-    }
-    @media (min-width: 576px) {
-      width: 90vw;
-    }
+    width: 100vw;
     .fullHeight {
       height: 100vh;
       .section1 {
@@ -376,7 +671,7 @@ export default {
           padding: 10vh 10vw 70px 10vw;
         }
         @media (min-width: 576px) {
-          padding: 10vh 10vw 20px 10vw;
+          padding: 10vh 20vw 20px 10vw;
         }
         display: flex;
         flex-direction: column;
@@ -416,7 +711,7 @@ export default {
       }
       .section2 {
         height: 100vh;
-        padding: 10vh 10vw 70px 0;
+        padding: 10vh 20vw 70px 0;
         display: flex;
         .guestName {
           position: absolute;
@@ -446,7 +741,7 @@ export default {
           @media (min-width: 576px) {
             font-size: 21vw;
             top: 30vh;
-            right: -14vw;
+            right: -4vw;
             transform: rotate(90deg);
           }
         }
@@ -482,6 +777,55 @@ export default {
             background-attachment: scroll;
           }
         }
+      }
+      .section4 {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        .section4-text {
+          font-weight: 100;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+          @import url("https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap");
+          font-family: "Share Tech Mono", monospace;
+          text-align: center;
+          #cursor {
+            @media (max-width: 575.98px) {
+              margin-left: -15px;
+            }
+            @media (min-width: 576px) {
+              margin-left: -25px;
+            }
+          }
+        }
+        .colorSc {
+          color: $secondary;
+        }
+        .myVideo {
+          position: fixed;
+          right: 0;
+          bottom: 0;
+          min-width: 100%;
+          min-height: 100%;
+          object-fit: cover;
+          z-index: -1;
+          opacity: 0;
+        }
+      }
+      .section4-top {
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+        padding-top: 20px;
+      }
+      .scw {
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .nobackground {
+        background: none !important;
       }
     }
   }
