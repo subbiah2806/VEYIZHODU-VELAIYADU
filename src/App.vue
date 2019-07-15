@@ -25,8 +25,15 @@ import { mapGetters, mapActions } from "vuex";
 import Vue from "vue";
 import VueMaterial from "vue-material";
 import "vue-material/dist/vue-material.min.css";
-import { TweenLite, TweenMax, Back, Sine, TimelineMax, Power2 } from "gsap/all";
-
+import {
+  TweenLite,
+  TweenMax,
+  Back,
+  Sine,
+  TimelineMax,
+  Power2,
+  TextPlugin
+} from "gsap/all";
 Vue.use(VueMaterial);
 export default {
   name: "app",
@@ -45,6 +52,8 @@ export default {
     ...mapActions(["loading"])
   },
   mounted() {
+    // eslint-disable-next-line
+    const plugins = [TextPlugin];
     setTimeout(() => {
       store.dispatch({
         type: "loading",
