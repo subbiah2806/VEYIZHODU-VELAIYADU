@@ -32,7 +32,8 @@ import {
   Sine,
   TimelineMax,
   Power2,
-  TextPlugin
+  TextPlugin,
+  CSSPlugin
 } from "gsap/all";
 Vue.use(VueMaterial);
 export default {
@@ -53,7 +54,7 @@ export default {
   },
   mounted() {
     // eslint-disable-next-line
-    const plugins = [TextPlugin];
+    const plugins = [TextPlugin, CSSPlugin];
     setTimeout(() => {
       store.dispatch({
         type: "loading",
