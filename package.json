@@ -2,13 +2,11 @@
   "name": "tamizhodu-velaiyadu",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://tamilodu-vilaiyadu.herokuapp.com/",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "removeHeroku": "git remote rm heroku",
-    "addHeroku": "git remote add heroku https://git.heroku.com/murmuring-refuge-69288.git",
-    "deploy": "npm run removeHeroku && npm run addHeroku && git push heroku master"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "animejs": "^3.0.1",
